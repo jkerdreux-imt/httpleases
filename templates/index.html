@@ -1,0 +1,42 @@
+<html lang="en">
+<head>
+    <title>DHCP Leases List</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="dark" />
+    <link rel="stylesheet" href="static/pico.min.css" />
+</head>
+
+<body>
+    <main class="container">
+    <hgroup>
+        <h2>DHCP Leases List</h2>
+        <p>Generated list of DHCP leases for IPv4 server : {{ .Hostname }}</p>
+    </hgroup>
+
+    <table>
+    <thead>
+    <tr>
+        <th>IP</th>
+        <th>MAC</th>
+        <th>Hostname</th>
+        <th>Expires</th>
+    </tr>
+    </thead>
+    {{range  .Leases}}
+        <tr>
+        <td> {{ .IP }}</td>
+        <td> <samp> {{ .Hardware.MAC }} </samp></td> 
+        <td> {{ .ClientHostname }}</td> 
+        <td> {{ .Ends }}</td> 
+        </tr>
+    {{end}}
+    </table>
+
+    </main>
+
+    <footer class="container">
+        <small>Last updated: {{ .Now }}</small>
+    </footer>
+</body>
+</html>
