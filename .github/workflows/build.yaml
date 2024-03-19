@@ -1,18 +1,18 @@
-name: Build for Debian 11
+name: Default build (Linux/amd64)
 on: push
 
 
 jobs:
   build-deb-11:
     runs-on: self-hosted
-    container: golang:1.22-bullseye
+    container: golang:latest
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Go build
-        run: go build -buildvcs=false -o bin/httpleases-deb11
+        run: go build -buildvcs=false -o bin/httpleases
 
       - name: Check the data
         run: ls -lha $GITHUB_WORKSPACE/bin
@@ -22,7 +22,7 @@ jobs:
           git config --global --add safe.directory /__w/httpleases/httpleases
           git config --global user.name 'JKerdreux-imt'
           git config --global user.email 'jkerdreux-imt@users.noreply.github.com'
-          git add bin/httpleases-deb11
+          git add bin/httpleases
           git commit -am "Autobuild ${{ github.head_ref }}.${{ github.sha }}"
           git push
     # 
