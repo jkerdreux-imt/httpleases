@@ -11,7 +11,9 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Go build
-        run: go build -buildvcs=false -o bin/httpleases
+        run:
+          git pull
+          go build -buildvcs=false -o bin/httpleases
 
       - name: Check the data
         run: ls -lha $GITHUB_WORKSPACE/bin
@@ -35,7 +37,9 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Go build
-        run: go build -buildvcs=false -o bin/httpleases-deb11
+        run: |
+          git pull
+          go build -buildvcs=false -o bin/httpleases-deb11
 
       - name: Check the data
         run: ls -lha $GITHUB_WORKSPACE/bin
