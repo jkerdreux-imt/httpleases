@@ -5,7 +5,7 @@ on: push
 jobs:
   build-deb-11:
     runs-on: self-hosted
-    container: golang
+    container: golang:1.21-bullseye
 
     steps:
       - name: Checkout
