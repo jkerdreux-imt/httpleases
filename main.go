@@ -21,6 +21,8 @@ type LeasesPage struct {
 	Hostname string
 }
 
+const leasesFile = "/var/lib/dhcp/dhcpd.leases"
+
 //go:embed static
 var static embed.FS
 
@@ -28,6 +30,7 @@ var static embed.FS
 var templates embed.FS
 
 // filterLeases removes expired leases and find the latest lease for each IP
+// return a sorted list of leases
 func filterLeases(inputs []leases.Lease) []leases.Lease {
 	now := time.Now()
 	var result []leases.Lease
@@ -52,6 +55,7 @@ func filterLeases(inputs []leases.Lease) []leases.Lease {
 			result = append(result, l)
 		}
 	}
+	// sorting IP on string value isn't always a good idea
 	sort.SliceStable(result, func(i, j int) bool {
 		return result[i].IP.String() < result[j].IP.String()
 	})
@@ -59,7 +63,7 @@ func filterLeases(inputs []leases.Lease) []leases.Lease {
 }
 
 func getLeases() []leases.Lease {
-	f, err := os.Open("/var/lib/dhcp/dhcpd.leases")
+	f, err := os.Open(leasesFile)
 
 	if err != nil {
 		fmt.Println(err)
@@ -68,12 +72,6 @@ func getLeases() []leases.Lease {
 	f.Close()
 	result := filterLeases(r)
 	return result
-}
-
-func printLeases() {
-	for _, l := range getLeases() {
-		fmt.Printf(" %s %s, %s \t %s \t %s\n", l.IP, l.BindingState, l.ClientHostname, l.Ends, l.Hardware.MACAddr)
-	}
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
