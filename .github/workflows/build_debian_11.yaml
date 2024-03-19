@@ -6,7 +6,7 @@ jobs:
   build-deb-11:
     runs-on: self-hosted
     container: golang
-i
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
