@@ -12,7 +12,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Go build
-        run: go build . -buildvcs=false
+        run: go build -buildvcs=false .
         
       
     
