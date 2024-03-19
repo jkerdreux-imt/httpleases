@@ -1,0 +1,11 @@
+name: Build for Debian 11
+on: push
+
+
+jobs:
+  print-username:
+    runs-on: self-hosted
+
+    steps:
+      - name: Print stuff
+        run: echo This is a fucking test
