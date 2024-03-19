@@ -46,9 +46,8 @@ jobs:
           git pull
 
       - name: Go build
-        run: |
-          git pull
-          go build -buildvcs=false -o bin/httpleases-deb11
+        # run: go build -buildvcs=false -o bin/httpleases
+        run: go build -o bin/httpleases-deb11
 
       - name: Check the data
         run: ls -lha $GITHUB_WORKSPACE/bin
