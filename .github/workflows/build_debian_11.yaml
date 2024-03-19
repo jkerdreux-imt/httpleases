@@ -13,6 +13,14 @@ jobs:
 
       - name: Go build
         run: go build -buildvcs=false .
+
+      - name: Commit report
+        run: |
+          git config --global user.name 'JKerdreux-imt'
+          git config --global user.email 'jkerdreux-imt@users.noreply.github.com'
+          git commit -am "Automated report"
+          git push
+
         
       
     
