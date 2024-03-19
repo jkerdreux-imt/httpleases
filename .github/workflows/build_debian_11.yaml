@@ -3,9 +3,15 @@ on: push
 
 
 jobs:
-  print-username:
+  build-deb-11:
     runs-on: self-hosted
 
     steps:
-      - name: Print stuff
-        run: echo This is a fucking test
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Go build
+        run: go build .
+        
+      
+    
