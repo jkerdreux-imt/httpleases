@@ -19,6 +19,7 @@ jobs:
 
       - name: Commit report
         run: |
+          git config --global --add safe.directory /__w/httpleases/httpleases
           git config --global user.name 'JKerdreux-imt'
           git config --global user.email 'jkerdreux-imt@users.noreply.github.com'
           git commit -am "Automated report"
