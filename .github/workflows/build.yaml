@@ -3,7 +3,7 @@ on: push
 
 
 jobs:
-  build-deb-11:
+  build:
     runs-on: self-hosted
     container: golang:latest
 
