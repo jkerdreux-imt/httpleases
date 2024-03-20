@@ -3,8 +3,8 @@ on: push
 
 jobs:
   build:
-    #runs-on: self-hosted
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
+    # runs-on: ubuntu-latest
     container: golang:latest
 
     steps:
@@ -35,7 +35,8 @@ jobs:
 
 
   build-deb-11:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
+    # runs-on: ubuntu-latest
     container: golang:1.22-bullseye
 
     steps:
