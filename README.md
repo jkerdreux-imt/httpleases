@@ -9,6 +9,7 @@ Simple webpage showing the list of DHCP leases on a server.
  - Tested only with [ISC DHCP](https://www.isc.org/dhcp/) server.
  - No configuration file right now. Open your browser on http://server:7777.
  - Only a single binary file (6.9MB). CSS, template are included in the binary.
+ - Rely on [go-dhcpd-leases](github.com/npotts/go-dhcpd-leases) package.
 
 ## TODO
  - Add support for IPv6.
