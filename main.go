@@ -15,12 +15,6 @@ import (
 	leases "github.com/npotts/go-dhcpd-leases"
 )
 
-type LeasesPage struct {
-	Leases   []leases.Lease
-	Now      string
-	Hostname string
-}
-
 const leasesFile = "/var/lib/dhcp/dhcpd.leases"
 
 //go:embed static
@@ -87,13 +81,17 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	hostname, _ := fqdn.FqdnHostname()
 
-	page := &LeasesPage{
+	data := struct {
+		Hostname string
+		Leases   []leases.Lease
+		Now      string
+	}{
+		Hostname: hostname,
 		Leases:   getLeases(),
 		Now:      time.Now().Format("2006-01-02 15:04:05"),
-		Hostname: hostname,
 	}
 
-	err = tmpl.Execute(w, page)
+	err = tmpl.Execute(w, data)
 	if err != nil {
 		log.Println(err)
 	}
