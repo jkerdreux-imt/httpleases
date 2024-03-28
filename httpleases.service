@@ -1,0 +1,11 @@
+[Unit]
+Description=DHCP Leases List
+After=network.target
+
+[Service]
+Type=simple
+User=root
+ExecStart=/usr/local/bin/httpleases
+
+[Install]
+WantedBy=multi-user.target
