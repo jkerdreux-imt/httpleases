@@ -27,10 +27,10 @@
       </thead>
       {{range .Leases}}
       <tr>
-        <td> {{ .IP }}</td>
-        <td> <samp> {{ .Hardware.MAC }} </samp></td>
-        <td> {{ .ClientHostname }}</td>
-        <td> {{ .Ends }}</td>
+        <td>{{ .IP }}</td>
+        <td><samp>{{ .Hardware.MAC }}</samp></td>
+        <td>{{ .ClientHostname }}</td>
+        <td>{{ .Ends }}</td>
       </tr>
       {{end}}
     </table>
