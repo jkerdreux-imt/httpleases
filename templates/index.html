@@ -27,8 +27,12 @@
       </thead>
       {{range .Leases}}
       <tr>
+        {{if .VendorClassID}}
+        <td><span data-tooltip="{{ .VendorClassID }}">{{ .IP }}</span></td>
+        {{else}}
         <td>{{ .IP }}</td>
-        <td><samp>{{ .Hardware.MAC }}</samp></td>
+        {{end}}
+        <td><samp ><a href="https://maclookup.app/search/result?mac={{ .Hardware.MAC }}">{{ .Hardware.MAC }}</a></samp></td>
         <td>{{ .ClientHostname }}</td>
         <td>{{ .Ends }}</td>
       </tr>
