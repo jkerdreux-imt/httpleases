@@ -37,7 +37,7 @@ jobs:
   build-deb-11:
     runs-on: self-hosted
     # runs-on: ubuntu-latest
-    container: golang:1.22-bullseye
+    container: golang:1.22.2-bullseye
 
     steps:
       - name: Checkout
