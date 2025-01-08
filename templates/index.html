@@ -1,49 +1,45 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
+  <head>
+    <title>DHCP Leases List</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <link rel="stylesheet" href="static/pico.min.css" />
+  </head>
 
-<head>
-  <title>DHCP Leases List</title>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="color-scheme" content="light" />
-  <link rel="stylesheet" href="static/pico.min.css" />
-</head>
+  <body>
+    <main class="container">
+      <hgroup>
+        <h2>DHCP Leases List</h2>
+        <p>Generated list of DHCP leases: server: <b>{{ .Hostname }}</b> / entries: <b>{{ .Total }}</b>.</p>
+      </hgroup>
 
-<body>
-  <main class="container">
-    <hgroup>
-      <h2>DHCP Leases List</h2>
-      <p>Generated list of DHCP leases for IPv4 server: {{ .Hostname }}</p>
-    </hgroup>
-
-    <table>
-      <thead>
+      <table>
+        <thead>
+          <tr>
+            <th>IP</th>
+            <th>MAC</th>
+            <th>Hostname</th>
+            <th>Expires</th>
+          </tr>
+        </thead>
+        {{range .Leases}}
         <tr>
-          <th>IP</th>
-          <th>MAC</th>
-          <th>Hostname</th>
-          <th>Expires</th>
+          <td>{{ .IP }}</td>
+          <td>
+            <samp><a href="https://maclookup.app/search/result?mac={{ .MacAddress }}">{{ .MacAddress }}</a></samp>
+          </td>
+          <td>{{ .ClientHostname }}</td>
+          <td>{{ .Ends }}</td>
+          <td></td>
         </tr>
-      </thead>
-      {{range .Leases}}
-      <tr>
-        {{if .VendorClassID}}
-        <td><span data-tooltip="{{ .VendorClassID }}">{{ .IP }}</span></td>
-        {{else}}
-        <td>{{ .IP }}</td>
         {{end}}
-        <td><samp ><a href="https://maclookup.app/search/result?mac={{ .Hardware.MAC }}">{{ .Hardware.MAC }}</a></samp></td>
-        <td>{{ .ClientHostname }}</td>
-        <td>{{ .Ends }}</td>
-      </tr>
-      {{end}}
-    </table>
+      </table>
+    </main>
 
-  </main>
-
-  <footer class="container">
-    <small>Last updated: {{ .Now }}</small>
-  </footer>
-</body>
-
+    <footer class="container">
+      <small>Last updated: {{ .Now }}</small>
+    </footer>
+  </body>
 </html>

@@ -1,21 +1,30 @@
 package main
 
 import (
+	"bufio"
 	"embed"
 	"fmt"
 	"io/fs"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"sort"
+	"strconv"
+	"strings"
 	"text/template"
 	"time"
 
 	"github.com/Showmax/go-fqdn"
-	leases "github.com/npotts/go-dhcpd-leases"
 )
 
-const leasesFile = "/var/lib/dhcp/dhcpd.leases"
+type lease struct {
+	Ends           time.Time
+	MacAddress     string
+	IP             net.IP
+	ClientHostname string
+	ClientID       string
+}
 
 //go:embed static
 var static embed.FS
@@ -23,49 +32,88 @@ var static embed.FS
 //go:embed templates
 var templates embed.FS
 
-// filterLeases removes expired leases and find the latest lease for each IP
-// return a sorted list of leases
-func filterLeases(inputs []leases.Lease) []leases.Lease {
-	now := time.Now()
-	var result []leases.Lease
-	for _, l := range inputs {
-		// iif lease is expired, don't return it
-		if l.Ends.Before(now) {
-			continue
-		}
-
-		// search for an existing lease with the same IP
-		var found bool
-		for i, r := range result {
-			if l.IP.Equal(r.IP) {
-				found = true
-				if l.Ends.After(r.Ends) {
-					result[i] = l
-				}
-				break
-			}
-		}
-		if !found {
-			result = append(result, l)
-		}
+func isIPv6(ip net.IP) bool {
+	return ip.To4() == nil
+}
+func timeFormat(t time.Duration) string {
+	if t >= time.Hour {
+		hours := int(t / time.Hour)
+		minutes := int((t % time.Hour) / time.Minute)
+		return fmt.Sprintf("%2dh %02dm", hours, minutes)
+	} else {
+		minutes := int(t / time.Minute)
+		seconds := int((t % time.Minute).Seconds())
+		return fmt.Sprintf("%2dm %02ds", minutes, seconds)
 	}
-	// sorting IP on string value isn't always a good idea
-	sort.SliceStable(result, func(i, j int) bool {
-		return result[i].IP.String() < result[j].IP.String()
-	})
-	return result
 }
 
-func getLeases() []leases.Lease {
-	f, err := os.Open(leasesFile)
+func parseLease(line string) (*lease, error) {
+	arr := strings.Fields(line)
+	if len(arr) == 2 {
+		return nil, nil
+	}
+	if got, want := len(arr), 5; got != want {
+		return nil, fmt.Errorf("illegal lease: expected %d fields, got %d", want, got)
+	}
 
+	expires, err := strconv.ParseInt(arr[0], 10, 64)
+	if err != nil {
+		return nil, err
+	}
+
+	return &lease{
+		Ends:           time.Unix(expires, 0),
+		MacAddress:     arr[1],
+		IP:             net.ParseIP(arr[2]),
+		ClientHostname: arr[3],
+		ClientID:       arr[4],
+	}, nil
+}
+
+func readLeaseFile(path string) ([]lease, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		if os.IsNotExist(err) {
+			// ignore
+			return []lease{}, nil
+		}
+
+		return nil, err
+	}
+
+	defer f.Close()
+
+	scanner := bufio.NewScanner(f)
+	activeLeases := []lease{}
+
+	for scanner.Scan() {
+		activeLease, err := parseLease(scanner.Text())
+		if err != nil {
+			return nil, err
+		}
+		if activeLease != nil {
+			activeLeases = append(activeLeases, *activeLease)
+		}
+	}
+
+	if err := scanner.Err(); err != nil {
+		return nil, err
+	}
+
+	sort.SliceStable(activeLeases, func(i, j int) bool {
+		return string(activeLeases[i].IP.To16()) < string(activeLeases[j].IP.To16())
+	})
+
+	return activeLeases, nil
+}
+
+func getLeases() []lease {
+	results, err := readLeaseFile("/var/lib/dnsmasq/dhcp.leases")
 	if err != nil {
 		fmt.Println(err)
+		os.Exit(1)
 	}
-	r := leases.Parse(f)
-	f.Close()
-	result := filterLeases(r)
-	return result
+	return results
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
@@ -80,15 +128,18 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	hostname, _ := fqdn.FqdnHostname()
+	leases := getLeases()
 
 	data := struct {
 		Hostname string
-		Leases   []leases.Lease
+		Leases   []lease
 		Now      string
+		Total    int
 	}{
 		Hostname: hostname,
-		Leases:   getLeases(),
+		Leases:   leases,
 		Now:      time.Now().Format("2006-01-02 15:04:05"),
+		Total:    len(leases),
 	}
 
 	err = tmpl.Execute(w, data)
