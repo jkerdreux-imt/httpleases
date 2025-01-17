@@ -19,7 +19,7 @@ import (
 )
 
 type lease struct {
-	Ends           time.Time
+	Expire         string
 	MacAddress     string
 	IP             net.IP
 	Hostname       string
@@ -48,16 +48,11 @@ func getHostname(ip string) (string, error) {
 	return "", nil
 }
 
-func timeFormat(t time.Duration) string {
-	if t >= time.Hour {
-		hours := int(t / time.Hour)
-		minutes := int((t % time.Hour) / time.Minute)
-		return fmt.Sprintf("%2dh %02dm", hours, minutes)
-	} else {
-		minutes := int(t / time.Minute)
-		seconds := int((t % time.Minute).Seconds())
-		return fmt.Sprintf("%2dm %02ds", minutes, seconds)
-	}
+func timeFormat(d time.Duration) string {
+	h := int(d.Hours())
+	m := int(d.Minutes()) % 60
+	s := int(d.Seconds()) % 60
+	return fmt.Sprintf("%02d:%02d:%02d", h, m, s)
 }
 
 func parseLease(line string) (*lease, error) {
@@ -73,11 +68,12 @@ func parseLease(line string) (*lease, error) {
 	if err != nil {
 		return nil, err
 	}
-
+	end := time.Unix(expires, 0)
+	diff := end.Sub(time.Now())
 	hostname, _ := getHostname(arr[2])
 
 	return &lease{
-		Ends:           time.Unix(expires, 0),
+		Expire:         timeFormat(diff),
 		MacAddress:     arr[1],
 		IP:             net.ParseIP(arr[2]),
 		Hostname:       hostname,
