@@ -8,6 +8,18 @@
     <link rel="stylesheet" href="static/pico.min.css" />
   </head>
 
+  <style>
+    body {
+      font-size: 80%;
+    }
+    hgroup > p {
+      font-size: 100% !important;
+    }
+    hgroup > h2 {
+      font-size: 130%;
+    }
+  </style>
+
   <body>
     <main class="container">
       <hgroup>
@@ -21,6 +33,7 @@
             <th>IP</th>
             <th>MAC</th>
             <th>Hostname</th>
+            <th>Client Hostname</th>
             <th>Expires</th>
           </tr>
         </thead>
@@ -30,6 +43,7 @@
           <td>
             <samp><a href="https://maclookup.app/search/result?mac={{ .MacAddress }}">{{ .MacAddress }}</a></samp>
           </td>
+          <td>{{ .Hostname }}</td>
           <td>{{ .ClientHostname }}</td>
           <td>{{ .Ends }}</td>
           <td></td>

@@ -22,6 +22,7 @@ type lease struct {
 	Ends           time.Time
 	MacAddress     string
 	IP             net.IP
+	Hostname       string
 	ClientHostname string
 	ClientID       string
 }
@@ -35,6 +36,18 @@ var templates embed.FS
 func isIPv6(ip net.IP) bool {
 	return ip.To4() == nil
 }
+
+func getHostname(ip string) (string, error) {
+	names, err := net.LookupAddr(ip)
+	if err != nil {
+		return "", err
+	}
+	if len(names) > 0 {
+		return names[0], nil
+	}
+	return "", nil
+}
+
 func timeFormat(t time.Duration) string {
 	if t >= time.Hour {
 		hours := int(t / time.Hour)
@@ -61,10 +74,13 @@ func parseLease(line string) (*lease, error) {
 		return nil, err
 	}
 
+	hostname, _ := getHostname(arr[2])
+
 	return &lease{
 		Ends:           time.Unix(expires, 0),
 		MacAddress:     arr[1],
 		IP:             net.ParseIP(arr[2]),
+		Hostname:       hostname,
 		ClientHostname: arr[3],
 		ClientID:       arr[4],
 	}, nil
